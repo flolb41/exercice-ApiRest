@@ -2,6 +2,7 @@
 import express from "express";
 import http from "http";
 import * as dotenv from 'dotenv';
+import cors from 'cors';
 import helmet from 'helmet';
 import baseDonnee from "./envSample";
 import fruitsRoutes from "./routes/fruits";
@@ -39,7 +40,8 @@ mongoose
     )
     .then(() => console.log("Connexion à MongoDB réussie !"))
     .catch(() => console.log("Connexion à MongoDB échouée !"));
-
+    
+app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
