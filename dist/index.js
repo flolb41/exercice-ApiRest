@@ -38,13 +38,12 @@ const discover = require('express-route-discovery');
 const baseDonnee = require("./envSample");
 /* Import des routes de l'API */
 const fruitsRoutes = require("./routes/fruits");
-dotenv.config();
-if (!process.env.PORT) {
-    console.error("Pas de port d'environnement défini");
-    process.exit(1);
-}
-const PORT = parseInt(process.env.PORT, 10);
+const PORT = process.env.PORT || 3000;
 const app = (0, express_1.default)();
+/* Création du serveur */
+const httpserver = http_1.default.createServer(app);
+dotenv.config();
+/* Connection à la base de données MongoDb Atlas à l'aide de mongoose */
 mongoose
     .connect("mongodb+srv://" +
     baseDonnee.userName +
@@ -70,11 +69,3 @@ app.use((req, res, next) => {
 /* Accès aux routes de l'API */
 app.use("/api/fruits", fruitsRoutes);
 app.locals.routes = discover(app);
-/* Connection à la base de données MongoDb Atlas à l'aide de mongoose */
-/* erreur levée */
-app.use((req, res, next) => {
-    const error = new Error("Oups, je n'ai rien trouvé !");
-    return res.status(404).json({ message: error.message });
-});
-/* Création du serveur */
-const httpserver = http_1.default.createServer(app);
