@@ -2,7 +2,6 @@
 import express from "express";
 import http from "http";
 import * as dotenv from 'dotenv';
-import cors from 'cors';
 import helmet from 'helmet';
 import baseDonnee from "./envSample";
 import fruitsRoutes from "./routes/fruits";
@@ -42,7 +41,6 @@ mongoose
     .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 app.use(helmet());
-app.use(cors());
 app.use(express.json());
 
 /* Définition des règles des headers de l'API */
