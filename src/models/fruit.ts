@@ -2,7 +2,7 @@
 const mangoose = require('mongoose');
 
 /* Création du schéma du model de fruit */
-const fruitSchema = mangoose.Schema({
+const fruitSchema = new mangoose.Schema({
     id: { type: String },
     name: { type: String, required: true },
     price: { type: Number, required: true },
