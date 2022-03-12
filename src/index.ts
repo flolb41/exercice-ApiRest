@@ -27,15 +27,15 @@ const app = express();
 mongoose
     .connect(
         "mongodb+srv://" +
-        process.env.userName +
+        baseDonnee.userName +
         ":" +
-        process.env.pwdAtlas +
+        baseDonnee.pwdAtlas +
         "@cluster0.9d5di.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
         { useNewUrlParser: true, useUnifiedTopology: true }
     )
     .then(() => console.log("Connexion à MongoDB réussie !"))
     .catch(() => console.log("Connexion à MongoDB échouée !"));
-    
+
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
