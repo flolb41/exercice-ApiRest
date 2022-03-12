@@ -24,6 +24,18 @@ if (!process.env.PORT) {
 const PORT: number = parseInt(process.env.PORT as string, 10);
 const app = express();
 
+mongoose
+    .connect(
+        "mongodb+srv://" +
+        process.env.userName +
+        ":" +
+        process.env.pwdAtlas +
+        "@cluster0.9d5di.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+        { useNewUrlParser: true, useUnifiedTopology: true }
+    )
+    .then(() => console.log("Connexion à MongoDB réussie !"))
+    .catch(() => console.log("Connexion à MongoDB échouée !"));
+    
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
@@ -51,17 +63,7 @@ app.use("/api/fruits", fruitsRoutes);
 
 app.locals.routes = discover(app);
 /* Connection à la base de données MongoDb Atlas à l'aide de mongoose */
-mongoose
-    .connect(
-        "mongodb+srv://" +
-        baseDonnee.userName +
-        ":" +
-        baseDonnee.pwdAtlas +
-        "@cluster0.9d5di.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-        { useNewUrlParser: true, useUnifiedTopology: true }
-    )
-    .then(() => console.log("Connexion à MongoDB réussie !"))
-    .catch(() => console.log("Connexion à MongoDB échouée !"));
+
 /* erreur levée */
 app.use((req, res, next) => {
     const error = new Error("Oups, je n'ai rien trouvé !");
