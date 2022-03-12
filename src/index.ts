@@ -1,36 +1,38 @@
 /* Importation des éléments servant à créer l'Api */
-import express, { Express } from "express";
+import express from "express";
 import http from "http";
+
+import * as dotenv from 'dotenv';
+import cors from 'cors';
+import helmet from 'helmet';
 
 const mongoose = require("mongoose");
 const discover = require('express-route-discovery');
-const router: Express = express();
-
 /* Par sécurité, il est préférable d'isoler les identifiants hors du code */
 const baseDonnee = require("./envSample");
 
 /* Import des routes de l'API */
 const fruitsRoutes = require("./routes/fruits");
 
-/* Adresse de connection à la base de données MongoDb Atlas à l'aide de mongoose */
-mongoose
-    .connect(
-        "mongodb+srv://" +
-        baseDonnee.userName +
-        ":" +
-        baseDonnee.pwdAtlas +
-        "@cluster0.9d5di.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-        { useNewUrlParser: true, useUnifiedTopology: true }
-    )
-    .then(() => console.log("Connexion à MongoDB réussie !"))
-    .catch(() => console.log("Connexion à MongoDB échouée !"));
+dotenv.config();
 
-router.use(express.urlencoded({ extended: false }));
-router.use(express.json());
+if (!process.env.PORT) {
+    console.error("Pas de port d'environnement défini");
+    process.exit(1);
+}
 
+const PORT: number = parseInt(process.env.PORT as string, 10);
+const app = express();
+
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+
+app.listen(PORT, () => 
+    console.log('Server à l\'écoute sur le port ' + PORT + '!'));
 
 /* Définition des règles des headers de l'API */
-router.use((req, res, next) => {
+app.use((req, res, next ) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
         "Access-Control-Allow-Headers",
@@ -45,19 +47,28 @@ router.use((req, res, next) => {
 });
 
 /* Accès aux routes de l'API */
-router.use("/api/fruits", fruitsRoutes);
+app.use("/api/fruits", fruitsRoutes);
 
-router.locals.routes = discover(router);
-
+app.locals.routes = discover(app);
+/* Connection à la base de données MongoDb Atlas à l'aide de mongoose */
+mongoose
+    .connect(
+        "mongodb+srv://" +
+        baseDonnee.userName +
+        ":" +
+        baseDonnee.pwdAtlas +
+        "@cluster0.9d5di.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+        { useNewUrlParser: true, useUnifiedTopology: true }
+    )
+    .then(() => console.log("Connexion à MongoDB réussie !"))
+    .catch(() => console.log("Connexion à MongoDB échouée !"));
 /* erreur levée */
-router.use((req, res, next) => {
+app.use((req, res, next) => {
     const error = new Error("Oups, je n'ai rien trouvé !");
     return res.status(404).json({ message: error.message });
 });
 
 /* Création du serveur */
-const httpserver = http.createServer(router);
-const PORT: any = process.env.PORT ?? 3000;
-router.listen(PORT, () => 
-    console.log('Server à l\'écoute sur le port ' + PORT + '!'));
+const httpserver = http.createServer(app);
+
 

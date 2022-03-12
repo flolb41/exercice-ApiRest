@@ -14,7 +14,7 @@ const router = (0, express_1.default)();
 const baseDonnee = require("./envSample");
 /* Import des routes de l'API */
 const fruitsRoutes = require("./routes/fruits");
-/* Adresse de connection à la base de données MongoDb Atlas à l'aide de mongoose */
+/* Connection à la base de données MongoDb Atlas à l'aide de mongoose */
 mongoose
     .connect("mongodb+srv://" +
     baseDonnee.userName +
