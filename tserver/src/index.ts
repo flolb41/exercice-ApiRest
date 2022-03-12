@@ -1,11 +1,10 @@
 /* Importation des éléments servant à créer l'Api */
-import { Request, Response, NextFunction } from "express";
-import { port } from "./config/constants";
+import express, { Express } from "express";
+import http from "http";
 
-const express = require("express");
-const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const discover = require('express-route-discovery');
+const router: Express = express();
 
 /* Par sécurité, il est préférable d'isoler les identifiants hors du code */
 const baseDonnee = require("./envSample");
@@ -26,32 +25,39 @@ mongoose
     .then(() => console.log("Connexion à MongoDB réussie !"))
     .catch(() => console.log("Connexion à MongoDB échouée !"));
 
-/* Création du premier 'aiguillage' de filtrage des headers qui autorisent ou non certaines requetes */
-const app = express();
+router.use(express.urlencoded({ extended: false }));
+router.use(express.json());
 
-app.use(express.json());
-app.listen(port, () => {
-    console.log('Server is listening on port ' + port + '!')});
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
+/* Définition des règles des headers de l'API */
+router.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
     );
-    res.setHeader(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE"
-    );
+    if (req.method === 'OPTIONS') {
+        res.header(
+            "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        return res.status(200).json({});
+        }
     next();
 });
 
-/* On passe par body-parser pour "normaliser" le body de la requete */
-app.use(bodyParser.json());
+/* Accès aux routes de l'API */
+router.use("/api/fruits", fruitsRoutes);
 
-/* Puis on va vers le router */
-app.use("/api/fruits", fruitsRoutes);
+router.locals.routes = discover(router);
 
-app.locals.routes = discover(app);
+/* erreur levée */
+router.use((req, res, next) => {
+    const error = new Error("Oups, je n'ai rien trouvé !");
+    return res.status(404).json({ message: error.message });
+});
 
-module.exports = app;
+/* Création du serveur */
+const httpserver = http.createServer(router);
+const PORT: any = process.env.PORT ?? 3000;
+router.listen(PORT, () => 
+    console.log('Server à l\'écoute sur le port ' + PORT + '!'));
+
