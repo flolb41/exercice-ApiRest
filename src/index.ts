@@ -40,20 +40,20 @@ mongoose
     )
     .then(() => console.log("Connexion à MongoDB réussie !"))
     .catch(() => console.log("Connexion à MongoDB échouée !"));
-    
+
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
 /* Définition des règles des headers de l'API */
 app.use((req, res, next ) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
     );
     if (req.method === 'OPTIONS') {
-        res.header(
+        res.setHeader(
             "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         return res.status(200).json({});
         }

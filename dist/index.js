@@ -64,10 +64,10 @@ app.use((0, helmet_1.default)());
 app.use(express_1.default.json());
 /* Définition des règles des headers de l'API */
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization");
     if (req.method === 'OPTIONS') {
-        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         return res.status(200).json({});
     }
     next();
