@@ -47,7 +47,7 @@ app.use(express.json());
 
 /* Définition des règles des headers de l'API */
 app.use((req, res, next ) => {
-    res.setHeader("Cross-Origin-Resource-policy: cross-origin", "*");
+    res.setHeader("*", "Access-Control-Allow-Origin: *");
     res.setHeader(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept, Authorization"
