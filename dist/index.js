@@ -32,30 +32,36 @@ const http_1 = __importDefault(require("http"));
 const dotenv = __importStar(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
-const mongoose = require("mongoose");
+const envSample_1 = __importDefault(require("./envSample"));
+const fruits_1 = __importDefault(require("./routes/fruits"));
+const mongoose = require('mongoose');
 const discover = require('express-route-discovery');
-/* Par sécurité, il est préférable d'isoler les identifiants hors du code */
-const baseDonnee = require("./envSample");
-/* Import des routes de l'API */
-const fruitsRoutes = require("./routes/fruits");
 const PORT = process.env.PORT || 3000;
 const app = (0, express_1.default)();
-/* Création du serveur */
-const httpserver = http_1.default.createServer(app);
+const errorHandler = (err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('un lien semble cassé !');
+};
+const httpserver = http_1.default.createServer(app); /* Création du serveur */
+const address = httpserver.address();
+httpserver.on('error', errorHandler);
+httpserver.on('listening', () => {
+    const address = httpserver.address();
+    const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + PORT;
+});
 dotenv.config();
 /* Connection à la base de données MongoDb Atlas à l'aide de mongoose */
 mongoose
     .connect("mongodb+srv://" +
-    baseDonnee.userName +
+    envSample_1.default.userName +
     ":" +
-    baseDonnee.pwdAtlas +
+    envSample_1.default.pwdAtlas +
     "@cluster0.9d5di.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("Connexion à MongoDB réussie !"))
     .catch(() => console.log("Connexion à MongoDB échouée !"));
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-app.listen(PORT, () => console.log('Server à l\'écoute sur le port ' + PORT + '!'));
 /* Définition des règles des headers de l'API */
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -67,5 +73,8 @@ app.use((req, res, next) => {
     next();
 });
 /* Accès aux routes de l'API */
-app.use("/api/fruits", fruitsRoutes);
+app.use("/api/fruits", fruits_1.default);
 app.locals.routes = discover(app);
+httpserver.listen(PORT, () => {
+    console.log(`Serveur démarré sur le port ${PORT}`);
+});

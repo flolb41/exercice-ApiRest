@@ -4,20 +4,27 @@ import http from "http";
 import * as dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
-const mongoose = require("mongoose");
+import baseDonnee from "./envSample";
+import fruitsRoutes from "./routes/fruits";
+
+const mongoose = require('mongoose');
 const discover = require('express-route-discovery');
-
-/* Par sécurité, il est préférable d'isoler les identifiants hors du code */
-const baseDonnee = require("./envSample");
-
-/* Import des routes de l'API */
-const fruitsRoutes = require("./routes/fruits");
-
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-/* Création du serveur */
-const httpserver = http.createServer(app);
+const errorHandler = (err: any, req: any, res: any, next: any) => {
+    console.error(err.stack);
+    res.status(500).send('un lien semble cassé !');
+};
+const httpserver = http.createServer(app);                                      /* Création du serveur */
+const address = httpserver.address();
+
+httpserver.on('error', errorHandler);
+httpserver.on('listening', () => {
+    const address = httpserver.address();
+    const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + PORT;
+});
+
 
 dotenv.config();
 
@@ -38,9 +45,6 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-app.listen(PORT, () => 
-    console.log('Server à l\'écoute sur le port ' + PORT + '!'));
-
 /* Définition des règles des headers de l'API */
 app.use((req, res, next ) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -59,3 +63,7 @@ app.use((req, res, next ) => {
 /* Accès aux routes de l'API */
 app.use("/api/fruits", fruitsRoutes);
 app.locals.routes = discover(app);
+
+httpserver.listen(PORT, () => {
+    console.log(`Serveur démarré sur le port ${PORT}`);
+});
